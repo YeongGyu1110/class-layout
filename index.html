@@ -3,195 +3,493 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>랜덤 자리 배치</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png" />
+    <title>Class Layout - 랜덤 자리 바꾸기</title>
+    <meta name="description" content="랜덤 자리 뽑기 프로그램. 랜덤 배치, 짝궁 정하기, 빠른 자리 선정 기능을 지원합니다.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Class Layout - 랜덤 자리 바꾸기">
+    <meta property="og:description" content="클릭 한 번으로 끝내는 교실 자리 배치. 지금 바로 시작해보세요.">
+    <meta property="og:image" content="https://github.com/YeongGyu1110/class-layout/blob/master/favicon.png">
+    <meta property="og:url" content="https://yeonggyu1110.github.io/class-layout/">
+    <meta property="og:site_name" content="Class Layout">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #fafafa;
-            overflow-x: hidden;
+        :root {
+            --bg-color: #F0F2F5;
+            --card-bg: #FFFFFF;
+            --primary: #4F46E5;
+            --primary-hover: #4338ca;
+            --text-main: #1F2937;
+            --text-sub: #9CA3AF;
+            --border-color: rgba(0, 0, 0, 0.05);
+            --seat-border: rgba(255, 255, 255, 0.5);
+            --disabled-bg: #E5E7EB;
+            --disabled-text: #D1D5DB;
+            --blackboard-bg: #E5E7EB;
+            --blackboard-text: #6B7280;
+            --input-bg: #F3F4F6;
+            
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+                           0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            
+            --radius-seat: 12px;
+            
+            --transition-speed: 0.3s;
         }
 
-        h1 {
+        [data-theme="dark"] {
+            --bg-color: #18181B;       
+            --card-bg: #27272A;        
+            --primary: #6366F1;        
+            --primary-hover: #818CF8;
+            --text-main: #F4F4F5;      
+            --text-sub: #A1A1AA;       
+            --border-color: rgba(255, 255, 255, 0.1);
+            --seat-border: rgba(255, 255, 255, 0.05);
+            --disabled-bg: #3F3F46;    
+            --disabled-text: #52525B;  
+            --blackboard-bg: #2D3748;
+            --blackboard-text: #A0AEC0;
+            --input-bg: #3F3F46;
+            
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body.preload, 
+        body.preload * {
+            transition: none !important;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .header-titles h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
+
+        .header-titles p {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            color: var(--text-main);
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--input-bg);
+        }
+
+        #icon-sun { display: none; }
+        #icon-moon { display: block; }
+
+        [data-theme="dark"] #icon-sun { display: block; }
+        [data-theme="dark"] #icon-moon { display: none; }
+
+        .btn-reset {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #EF4444;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-reset:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .layout {
+            display: flex;
+            margin-top: 70px;
+            height: calc(100vh - 70px);
+        }
+
+        nav {
+            width: 340px;
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.02);
+            z-index: 10;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-title {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            background-color: var(--input-bg);
+            padding: 10px 16px;
+            border-radius: 12px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .input-group:focus-within {
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+
+        .input-group input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-align: right;
+        }
+        
+        .input-group input::placeholder {
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .toggle-row label {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--input-bg);
+            transition: .3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.4);
+            margin-top: auto;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active { transform: scale(0.98); }
+
+        main {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            background-color: var(--bg-color);
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        #blackboard {
+            width: 100%; 
+            max-width: 1000px;
+            margin-bottom: 40px;
+            padding: 10px 24px;
+            background-color: var(--blackboard-bg);
+            color: var(--blackboard-text);
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
             text-align: center;
-            font-size: 36px;
-            color: #333;
-            margin-top: 20px;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
         }
 
         #seatContainer {
             display: grid;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
+            gap: 16px;
+            width: 100%;
+            max-width: 1000px;
+            justify-content: center;
             grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(6, 1fr);
         }
 
         .seat {
-            background-color: #dcdcdc;
-            color: #555;
+            background-color: var(--card-bg);
+            border-radius: var(--radius-seat);
+            aspect-ratio: 3/2; 
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: 5px;
-            height: 50px;
-            font-size: 24px;
-            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--seat-border);
+            
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
         }
 
-        .seat.occupied {
-            background-color: #4caf50;
-            color: #333;
+        .seat:not(.disabled):hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .seat.rolling {
+            color: var(--text-sub);
+            filter: blur(1.5px); 
+        }
+
+        .seat.confirmed {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background-color: var(--card-bg);
+            transform: scale(1.02);
+            z-index: 1;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        [data-theme="dark"] .seat.confirmed {
+            background-color: rgba(99, 102, 241, 0.1); 
+        }
+        [data-theme="light"] .seat.confirmed {
+            background-color: #F5F3FF;
+        }
+
+        .seat.confirmed.paired {
+            font-size: 1.2rem;
         }
 
         .seat.disabled {
-            background-color: #b0b0b0;
-            color: black;
+            background-color: var(--disabled-bg); 
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+            color: var(--disabled-text);
+            cursor: default;
+            border: 1px solid transparent;
         }
-
-
-        .seat:not(.disabled):hover {
-            background-color: #b0b0b0;
-            cursor: pointer;
+        .seat.disabled::after {
+            content: "✕";
+            font-size: 1.2rem;
         }
-
-
-        .filled {
-            background-color: #4caf50;
-            color: #fff;
-            border-color: #388e3c;
-        }
-
-        .empty {
-            background-color: #e0e0e0;
-            color: #9e9e9e;
-            border-color: #bdbdbd;
-        }
-
-        .inactive {
-            background-color: #9e9e9e;
-            color: #fff;
-            border-color: #757575;
-        }
-
-        #blackboard {
-            width: 100%;
-            text-align: center;
-            background-color: #2c3e50;
-            color: white;
-            font-weight: bold;
-            padding: 12px;
-            font-size: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            flex: 1 1 200px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .form-group input[type="number"],
-        .form-group input[type="text"] {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #27ae60;
-        }
-
-        #deleteButtonContainer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+        
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; }
+            nav { width: 100%; height: auto; padding: 20px; border-right: none; border-bottom: 1px solid var(--border-color); }
+            main { padding: 20px; }
+            .seat { font-size: 1.2rem; }
         }
     </style>
 </head>
 
-<body>
-    <h1 style="color: black;">
-        랜덤 자리 배치 프로그램
-    </h1>
-
-    <div id="deleteButtonContainer">
-        <button onclick="deleteData()" style="background-color: #e74c3c;">저장된 데이터 삭제</button>
-    </div>
-
-    <div class="form-container">
-        <div class="form-group">
-            <label for="studentCount">학생 수</label>
-            <input type="number" id="studentCount" min="1" placeholder="예: 20  (출석부 기준 인원 수)">
-        </div>
-        <div class="form-group">
-            <label for="rowCount">세로 줄 길이</label>
-            <input type="number" id="rowCount" min="1" placeholder="예: 6">
-        </div>
-        <div class="form-group">
-            <label for="colCount">가로 줄 수</label>
-            <input type="number" id="colCount" min="1" placeholder="예: 5">
-        </div>
-        <div class="form-group">
-            <label><input type="checkbox" id="pairing"> 짝지어 앉기</label>
-        </div>
-        <div class="form-group">
-            <label for="excludeStudents">제외할 학생 번호 (쉼표로 구분)</label>
-            <input type="text" id="excludeStudents" placeholder="예: 3, 7, 15">
-        </div>
-        <button onclick="generateSeats()">자리 배치</button>
-    </div>
-
-
-    <div id="blackboard">칠판</div>
-    <div id="seatContainer"></div>
+<body class="preload">
 
     <script>
-        let seatStatus = [];
-        let manualStatus = [];
-        let seatValues = [];
+        (function() {
+            const savedTheme = localStorage.getItem('classLayoutTheme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme ? savedTheme : (systemPrefersDark ? 'dark' : 'light');
+            document.body.setAttribute('data-theme', theme);
+        })();
+    </script>
 
-        document.addEventListener("keydown", function (event) {
-            var isCrtl = event.ctrlKey || event.metaKey;
-            var isF9 = event.key === "F9";
+    <header>
+        <div class="header-titles">
+            <h1>Class Layout</h1>
+            <p>Smart Seating System</p>
+        </div>
+        <div class="header-controls">
+            <button class="btn-icon" onclick="toggleTheme()" title="테마 변경">
+                <svg id="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg id="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+            <button class="btn-reset" onclick="deleteData()">초기화</button>
+        </div>
+    </header>
 
-            if (isCrtl && isF9) {
-                alert("add!");
-            }
-        });
+    <div class="layout">
+        <nav>
+            <div class="nav-section">
+                <span class="nav-title">Class Info</span>
+                <div class="input-group">
+                    <label for="studentCount">총 학생 수</label>
+                    <input type="number" id="studentCount" min="1" value="20" placeholder="출석부 기준 인원 수">
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-title">Grid Layout</span>
+                <div style="display: flex; gap: 10px;">
+                    <div class="input-group" style="flex:1;">
+                        <label for="colCount">행(Row)</label>
+                        <input type="number" id="colCount" min="1" value="5" placeholder="세로">
+                    </div>
+                    <div class="input-group" style="flex:1;">
+                        <label for="rowCount">열(Col)</label>
+                        <input type="number" id="rowCount" min="1" value="4" placeholder="가로">
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-title">Settings</span>
+                <div class="toggle-row">
+                    <label for="pairing">짝지어 앉기 (짝꿍)</label>
+                    <label class="switch">
+                        <input type="checkbox" id="pairing">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="input-group" style="margin-top: 10px;">
+                    <label for="excludeStudents">제외 번호</label>
+                    <input type="text" id="excludeStudents" placeholder="ex: 3, 14">
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="generateSeats()">자리 배치 시작</button>
+        </nav>
+
+        <main>
+            <div id="blackboard">Front (칠판)</div>
+            <div id="seatContainer"></div>
+        </main>
+    </div>
+
+    <script>
+        let manualStatus = []; 
 
         function saveData() {
             const data = {
@@ -203,11 +501,54 @@
                 manualStatus: manualStatus,
                 seatContainerHTML: document.getElementById('seatContainer').innerHTML
             };
-            localStorage.setItem('randomSeatData', JSON.stringify(data));
+            localStorage.setItem('classLayoutData', JSON.stringify(data));
         }
 
-        function loadData() {
-            const data = JSON.parse(localStorage.getItem('randomSeatData'));
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('classLayoutTheme', newTheme);
+        }
+
+        function initializeSeats() {
+            const rowCount = parseInt(document.getElementById('rowCount').value) || 4;
+            const colCount = parseInt(document.getElementById('colCount').value) || 5;
+
+            const seatContainer = document.getElementById('seatContainer');
+            seatContainer.innerHTML = '';
+            seatContainer.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
+            
+            const totalSeats = rowCount * colCount;
+            
+            if (manualStatus.length !== totalSeats) {
+                manualStatus = Array(totalSeats).fill(1);
+            }
+
+            for (let i = 0; i < totalSeats; i++) {
+                const seat = document.createElement('div');
+                seat.classList.add('seat');
+                seat.classList.add('empty');
+                
+                if (manualStatus[i] === 0) {
+                    seat.classList.remove('empty');
+                    seat.classList.add('disabled');
+                }
+
+                seat.addEventListener('click', () => toggleSeatStatus(seat, i));
+                seatContainer.appendChild(seat);
+            }
+        }
+
+        window.onload = function () {
+            setTimeout(() => {
+                document.body.classList.remove('preload');
+            }, 100);
+
+            const data = JSON.parse(localStorage.getItem('classLayoutData'));
+
             if (data) {
                 document.getElementById('studentCount').value = data.studentCount;
                 document.getElementById('rowCount').value = data.rowCount;
@@ -218,78 +559,67 @@
 
                 if (data.seatContainerHTML) {
                     const seatContainer = document.getElementById('seatContainer');
-                    seatContainer.innerHTML = data.seatContainerHTML;
+                    const cols = data.colCount || 5; 
+                    seatContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
+                    seatContainer.innerHTML = data.seatContainerHTML;
+                    
                     const seats = seatContainer.getElementsByClassName('seat');
                     for (let i = 0; i < seats.length; i++) {
                         seats[i].addEventListener('click', () => toggleSeatStatus(seats[i], i));
                     }
-                }
-            }
-        }
-
-        function initializeSeats(rowCount = 6, colCount = 5) {
-            const seatContainer = document.getElementById('seatContainer');
-            seatContainer.innerHTML = '';
-
-            seatContainer.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
-            seatContainer.style.gridTemplateRows = `repeat(${rowCount}, 1fr)`;
-
-            if (manualStatus.length !== rowCount * colCount) {
-                manualStatus = Array(rowCount * colCount).fill(1);
-            }
-
-
-            for (let i = 0; i < rowCount * colCount; i++) {
-                const seat = document.createElement('div');
-                seat.classList.add('seat');
-                if (manualStatus[i] === 0) {
-                    seat.classList.add('disabled');
-                    seat.textContent = '-';
                 } else {
-                    seat.classList.add('empty');
-                    seat.textContent = '-';
+                    initializeSeats();
                 }
-                seat.dataset.status = 'empty';
-                seat.addEventListener('click', () => toggleSeatStatus(seat, i));
-                seatContainer.appendChild(seat);
+            } else {
+                initializeSeats();
             }
-            saveData();
+
+            const inputs = ['studentCount', 'rowCount', 'colCount', 'pairing', 'excludeStudents'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    if(id === 'rowCount' || id === 'colCount') {
+                        manualStatus = []; 
+                        initializeSeats(); 
+                    }
+                    saveData();
+                });
+            });
         }
 
         function toggleSeatStatus(seat, index) {
             if (seat.classList.contains('disabled')) {
                 seat.classList.remove('disabled');
-                seat.classList.add('empty');
-                seat.textContent = '-';
                 manualStatus[index] = 1;
+
+                if (seat.dataset.prevHtml) {
+                    seat.innerHTML = seat.dataset.prevHtml;
+                    seat.className = seat.dataset.prevClass;
+                    delete seat.dataset.prevHtml;
+                    delete seat.dataset.prevClass;
+                } else {
+                    seat.classList.add('empty');
+                }
+
             } else {
-                seat.classList.remove('empty');
-                seat.classList.remove('occupied');
-                seat.classList.add('disabled');
-                seat.textContent = '-';
                 manualStatus[index] = 0;
+                
+                if (!seat.classList.contains('empty')) {
+                    seat.dataset.prevHtml = seat.innerHTML;
+                    seat.dataset.prevClass = seat.className;
+                }
+                
+                seat.className = 'seat disabled';
+                seat.textContent = '';
             }
             saveData();
         }
 
         function deleteData() {
-            if (confirm('저장된 모든 데이터를 삭제하시겠습니까?')) {
-                localStorage.removeItem('randomSeatData');
+            if (confirm('설정을 초기화하시겠습니까?')) {
+                localStorage.removeItem('classLayoutData');
                 location.reload();
             }
-        }
-
-        window.onload = function () {
-            loadData();
-            if (!document.getElementById('seatContainer').innerHTML) {
-                initializeSeats();
-            }
-            document.getElementById('studentCount').addEventListener('input', saveData);
-            document.getElementById('rowCount').addEventListener('input', saveData);
-            document.getElementById('colCount').addEventListener('input', saveData);
-            document.getElementById('pairing').addEventListener('change', saveData);
-            document.getElementById('excludeStudents').addEventListener('input', saveData);
         }
 
         function padNumber(num) {
@@ -298,100 +628,6 @@
 
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        async function generateSeats() {
-            const studentCount = parseInt(document.getElementById('studentCount').value);
-            if (!studentCount || studentCount <= 0) {
-                alert('학생 수를 올바르게 입력해주세요.');
-                return;
-            }
-            const rowCount = parseInt(document.getElementById('rowCount').value) || 5;
-            const colCount = parseInt(document.getElementById('colCount').value) || 6;
-            const pairing = document.getElementById('pairing').checked;
-            const excludeStudents = document.getElementById('excludeStudents').value
-                .split(',')
-                .map(num => parseInt(num.trim()))
-                .filter(num => !isNaN(num));
-
-            const totalSeats = rowCount * colCount;
-
-            const seatContainer = document.getElementById('seatContainer');
-            seatContainer.innerHTML = '';
-            seatContainer.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
-            seatContainer.style.gridTemplateRows = `repeat(${rowCount}, 1fr)`;
-
-            let studentNumbers = [];
-            for (let i = 1; i <= studentCount; i++) {
-                if (!excludeStudents.includes(i)) {
-                    studentNumbers.push(i);
-                }
-            }
-
-            const seats = [];
-            for (let i = 0; i < totalSeats; i++) {
-                const seat = document.createElement('div');
-                seat.classList.add('seat');
-                if (manualStatus[i] === 0) {
-                    seat.classList.add('disabled');
-                    seat.textContent = '-';
-                } else {
-                    seat.classList.add('empty');
-                    seat.textContent = '-';
-                }
-                seat.addEventListener('click', () => toggleSeatStatus(seat, i));
-                seatContainer.appendChild(seat);
-                seats.push(seat);
-            }
-
-            const numOccupiedSeats = pairing ? Math.ceil(studentNumbers.length / 2) : studentNumbers.length;
-            const availableSeats = seats.filter((_, i) => manualStatus[i] !== 0);
-            const seatsToAnimate = availableSeats.slice(0, numOccupiedSeats);
-
-            const allPossibleStudents = Array.from({ length: studentCount }, (_, i) => i + 1);
-
-            const totalSpins = 15;
-            const startSpeed = 50;
-            const endSpeed = 250;
-            const speedIncrement = (endSpeed - startSpeed) / totalSpins;
-
-            for (let spin = 0; spin < totalSpins; spin++) {
-                const shuffledForAnimation = shuffle([...allPossibleStudents]);
-                let studentAnimIndex = 0;
-                for (const seat of seatsToAnimate) {
-                    seat.textContent = shuffledForAnimation[studentAnimIndex % shuffledForAnimation.length];
-                    studentAnimIndex++;
-                    seat.classList.add('occupied');
-                }
-                const currentSpeed = startSpeed + (spin * speedIncrement);
-                await sleep(currentSpeed);
-            }
-
-            studentNumbers = shuffle(studentNumbers);
-            let studentIndex = 0;
-            for (let i = 0; i < totalSeats; i++) {
-                const seat = seats[i];
-                seat.classList.remove('occupied', 'paired', 'empty');
-
-                if (manualStatus[i] === 0) {
-                    seat.classList.add('disabled');
-                    seat.textContent = '-';
-                } else if (studentIndex < studentNumbers.length) {
-                    if (pairing && studentIndex + 1 < studentNumbers.length) {
-                        seat.classList.add('paired');
-                        seat.textContent = `${padNumber(studentNumbers[studentIndex])} | ${padNumber(studentNumbers[studentIndex + 1])}`;
-                        studentIndex += 2;
-                    } else {
-                        seat.textContent = studentNumbers[studentIndex];
-                        studentIndex += 1;
-                    }
-                    seat.classList.add('occupied');
-                } else {
-                    seat.textContent = '-';
-                    seat.classList.add('empty');
-                }
-            }
-            saveData();
         }
 
         function shuffle(array) {
@@ -403,7 +639,123 @@
             }
             return array;
         }
+
+        async function generateSeats() {
+            const studentCount = parseInt(document.getElementById('studentCount').value);
+            const rowCount = parseInt(document.getElementById('rowCount').value) || 4;
+            const colCount = parseInt(document.getElementById('colCount').value) || 5;
+            
+            if (!studentCount || studentCount <= 0) {
+                alert('학생 수를 입력해주세요.');
+                return;
+            }
+
+            const pairing = document.getElementById('pairing').checked;
+            const excludeVal = document.getElementById('excludeStudents').value;
+            const excludeStudents = excludeVal ? excludeVal.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)) : [];
+
+            const seatContainer = document.getElementById('seatContainer');
+            seatContainer.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
+            
+            let seats = Array.from(seatContainer.children);
+            if(seats.length !== rowCount * colCount) {
+                initializeSeats();
+                seats = Array.from(seatContainer.children);
+            }
+
+            let studentNumbers = [];
+            for (let i = 1; i <= studentCount; i++) {
+                if (!excludeStudents.includes(i)) studentNumbers.push(i);
+            }
+
+            const availableSeatIndices = [];
+            seats.forEach((seat, idx) => {
+                delete seat.dataset.prevHtml;
+                delete seat.dataset.prevClass;
+
+                if(manualStatus[idx] === 0) {
+                    seat.className = 'seat disabled';
+                    seat.textContent = '';
+                } else {
+                    seat.className = 'seat empty';
+                    seat.textContent = '';
+                    availableSeatIndices.push(idx);
+                }
+            });
+
+            const neededSeats = pairing ? Math.ceil(studentNumbers.length / 2) : studentNumbers.length;
+            if (availableSeatIndices.length < neededSeats) {
+                alert(`자리가 부족합니다! (학생: ${studentNumbers.length}명, 가능좌석: ${availableSeatIndices.length}개)`);
+                return;
+            }
+
+            const allStudentsForAnim = Array.from({length: studentCount}, (_, i) => i + 1);
+            const seatsToAnimate = availableSeatIndices.map(i => seats[i]);
+            
+            const totalSpins = 10;
+            const startSpeed = 50;
+            const endSpeed = 200;
+            const speedIncrement = (endSpeed - startSpeed) / totalSpins;
+
+            for (let spin = 0; spin < totalSpins; spin++) {
+                const shuffledAnim = shuffle([...allStudentsForAnim]);
+                seatsToAnimate.forEach((seat, i) => {
+                    if (i < neededSeats) {
+                        seat.classList.add('rolling');
+                        
+                        if (pairing) {
+                            const idx1 = (i * 2) % shuffledAnim.length;
+                            const idx2 = (i * 2 + 1) % shuffledAnim.length;
+                            
+                            seat.innerHTML = `
+                                <span style="font-size: 1.2rem">${padNumber(shuffledAnim[idx1])}</span>
+                                <span style="margin:0 6px; opacity:0.3; font-weight:300;">|</span>
+                                <span style="font-size: 1.2rem">${padNumber(shuffledAnim[idx2])}</span>
+                            `;
+                        } else {
+                            seat.textContent = padNumber(shuffledAnim[i % shuffledAnim.length]);
+                        }
+                    }
+                });
+                await sleep(startSpeed + (spin * speedIncrement));
+            }
+
+            const shuffledStudents = shuffle([...studentNumbers]);
+            let studentIndex = 0;
+
+            availableSeatIndices.forEach(idx => {
+                seats[idx].className = 'seat empty';
+                seats[idx].textContent = '';
+            });
+
+            for (let i = 0; i < availableSeatIndices.length; i++) {
+                const seat = seats[availableSeatIndices[i]];
+
+                if (studentIndex < shuffledStudents.length) {
+                    seat.classList.remove('empty');
+                    seat.classList.add('confirmed');
+
+                    if (pairing) {
+                        if (studentIndex + 1 < shuffledStudents.length) {
+                            seat.classList.add('paired');
+                            seat.innerHTML = `
+                                <span>${padNumber(shuffledStudents[studentIndex])}</span>
+                                <span style="margin:0 6px; opacity:0.3; font-weight:300;">|</span>
+                                <span>${padNumber(shuffledStudents[studentIndex + 1])}</span>
+                            `;
+                            studentIndex += 2;
+                        } else {
+                            seat.textContent = padNumber(shuffledStudents[studentIndex]);
+                            studentIndex += 1;
+                        }
+                    } else {
+                        seat.textContent = padNumber(shuffledStudents[studentIndex]);
+                        studentIndex += 1;
+                    }
+                }
+            }
+            saveData();
+        }
     </script>
 </body>
-
 </html>
