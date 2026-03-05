@@ -498,6 +498,68 @@ main {
     #seatContainer {
         padding-bottom: 80px;
     }
+
+    .guide-content {
+        padding: 24px 20px;
+        margin-top: 40px;
+    }
+    
+    .guide-content h2 {
+        font-size: 1.2rem;
+    }
+}
+
+.guide-content {
+    width: 100%;
+    max-width: 800px;
+    margin: 60px auto 20px;
+    padding: 32px 40px;
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--border-color);
+    text-align: left;
+    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+.guide-content h2 {
+    font-size: 1.4rem;
+    color: var(--primary);
+    margin-bottom: 16px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.guide-content h3 {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin: 24px 0 12px;
+    font-weight: 700;
+}
+
+.guide-content p {
+    color: var(--text-sub);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+}
+
+.guide-content ul, 
+.guide-content ol {
+    color: var(--text-sub);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    padding-left: 24px;
+    margin-bottom: 16px;
+}
+
+.guide-content li {
+    margin-bottom: 6px;
+}
+
+.guide-content strong {
+    color: var(--text-main);
+    font-weight: 600;
 }
 
 .license-footer {
