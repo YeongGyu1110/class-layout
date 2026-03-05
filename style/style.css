@@ -77,7 +77,6 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
 }
 
@@ -445,6 +444,10 @@ main {
         display: flex !important;
     }
 
+    main {
+        padding: 20px;
+    }
+
     .layout {
         flex-direction: column;
         height: auto;
@@ -497,6 +500,11 @@ main {
 
     #seatContainer {
         padding-bottom: 80px;
+    }
+
+    .seat {
+        aspect-ratio: 1;
+        font-size: larger;
     }
 
     .guide-content {
