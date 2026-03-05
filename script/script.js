@@ -150,6 +150,12 @@ function shuffle(array) {
 }
 
 async function generateSeats() {
+
+    const nav = document.querySelector('nav');
+    if (nav.classList.contains('active')) {
+        toggleSettings();
+    }
+
     const studentCount = parseInt(document.getElementById('studentCount').value);
     const rowCount = parseInt(document.getElementById('rowCount').value) || 4;
     const colCount = parseInt(document.getElementById('colCount').value) || 5;
@@ -264,4 +270,12 @@ async function generateSeats() {
         }
     }
     saveData();
+}
+
+function toggleSettings() {
+    const nav = document.querySelector('nav');
+    const overlay = document.getElementById('overlay');
+
+    nav.classList.toggle('active');
+    overlay.classList.toggle('active');
 }
