@@ -352,7 +352,8 @@ main {
 #blackboard {
     width: 100%;
     max-width: 1000px;
-    margin-bottom: 40px;
+    margin-top: 40px;
+    margin-bottom: 20px;
     padding: 10px 24px;
     background-color: var(--blackboard-bg);
     color: var(--blackboard-text);
@@ -499,7 +500,11 @@ main {
     }
 
     #seatContainer {
-        padding-bottom: 80px;
+        padding-bottom: 0;
+    }
+    
+    #blackboard {
+        margin-bottom: 80px; 
     }
 
     .seat {
