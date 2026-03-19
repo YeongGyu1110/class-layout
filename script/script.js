@@ -205,6 +205,8 @@ async function generateSeats() {
         }
     });
 
+    availableSeatIndices.reverse();
+
     const neededSeats = pairing ? Math.ceil(studentNumbers.length / 2) : studentNumbers.length;
     if (availableSeatIndices.length < neededSeats) {
         alert(`자리가 부족합니다! (학생: ${studentNumbers.length}명, 가능좌석: ${availableSeatIndices.length}개)`);
