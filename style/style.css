@@ -366,7 +366,7 @@ main {
 main[data-view="teacher"] #blackboard {
     order: 2;
     margin-top: 40px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 main[data-view="teacher"] #seatContainer {
     order: 1;
@@ -374,8 +374,8 @@ main[data-view="teacher"] #seatContainer {
 
 main[data-view="student"] #blackboard {
     order: 1;
-    margin-top: 0px;
-    margin-bottom: 40px;
+    margin-top: 30px;
+    margin-bottom: 20px;
 }
 main[data-view="student"] #seatContainer {
     order: 2;
@@ -457,6 +457,11 @@ main[data-view="student"] #seatContainer {
     color: var(--disabled-text);
     cursor: default;
     border: 1px solid transparent;
+    cursor: pointer;
+}
+.seat.disabled:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }
 
 .seat.disabled::after {
