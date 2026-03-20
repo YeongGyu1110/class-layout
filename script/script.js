@@ -13,6 +13,7 @@ function saveData() {
         rowCount: document.getElementById('rowCount').value,
         colCount: document.getElementById('colCount').value,
         pairing: document.getElementById('pairing').checked,
+        viewMode: document.getElementById('viewMode').checked,
         excludeStudents: document.getElementById('excludeStudents').value,
         manualStatus: manualStatus,
         seatContainerHTML: document.getElementById('seatContainer').innerHTML
@@ -53,9 +54,20 @@ function initializeSeats() {
             seat.classList.add('disabled');
         }
 
-        seat.addEventListener('click', () => toggleSeatStatus(seat, i));
+        seat.addEventListener('click', () => toggleSeatStatus(seat));
         seatContainer.appendChild(seat);
     }
+}
+
+function toggleViewMode(isTeacherView) {
+    document.querySelector('main').setAttribute('data-view', isTeacherView ? 'teacher' : 'student');
+    
+    const seatContainer = document.getElementById('seatContainer');
+    const seats = Array.from(seatContainer.children);
+    
+    seats.reverse();
+    seats.forEach(seat => seatContainer.appendChild(seat));
+    manualStatus.reverse();
 }
 
 window.onload = function () {
@@ -70,6 +82,11 @@ window.onload = function () {
         document.getElementById('rowCount').value = data.rowCount;
         document.getElementById('colCount').value = data.colCount;
         document.getElementById('pairing').checked = data.pairing;
+
+        const isTeacherView = data.viewMode !== undefined ? data.viewMode : true;
+        document.getElementById('viewMode').checked = isTeacherView;
+        document.querySelector('main').setAttribute('data-view', isTeacherView ? 'teacher' : 'student');
+
         document.getElementById('excludeStudents').value = data.excludeStudents;
         manualStatus = data.manualStatus || [];
 
@@ -82,28 +99,36 @@ window.onload = function () {
 
             const seats = seatContainer.getElementsByClassName('seat');
             for (let i = 0; i < seats.length; i++) {
-                seats[i].addEventListener('click', () => toggleSeatStatus(seats[i], i));
+                const currentSeat = seats[i];
+                currentSeat.addEventListener('click', () => toggleSeatStatus(currentSeat));
             }
         } else {
             initializeSeats();
         }
     } else {
+        document.getElementById('viewMode').checked = true;
+        document.querySelector('main').setAttribute('data-view', 'teacher');
         initializeSeats();
     }
 
-    const inputs = ['studentCount', 'rowCount', 'colCount', 'pairing', 'excludeStudents'];
+    const inputs = ['studentCount', 'rowCount', 'colCount', 'pairing', 'excludeStudents', 'viewMode'];
     inputs.forEach(id => {
-        document.getElementById(id).addEventListener('change', () => {
+        document.getElementById(id).addEventListener('change', (e) => {
             if (id === 'rowCount' || id === 'colCount') {
                 manualStatus = [];
                 initializeSeats();
+            }
+            if (id === 'viewMode') {
+                toggleViewMode(e.target.checked);
             }
             saveData();
         });
     });
 }
 
-function toggleSeatStatus(seat, index) {
+function toggleSeatStatus(seat) {
+    const index = Array.from(seat.parentNode.children).indexOf(seat);
+
     if (seat.classList.contains('disabled')) {
         seat.classList.remove('disabled');
         manualStatus[index] = 1;
@@ -173,6 +198,8 @@ async function generateSeats() {
     }
 
     const pairing = document.getElementById('pairing').checked;
+    const isTeacherView = document.getElementById('viewMode').checked;
+
     const excludeVal = document.getElementById('excludeStudents').value;
     const excludeStudents = excludeVal ? excludeVal.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)) : [];
 
@@ -205,7 +232,8 @@ async function generateSeats() {
         }
     });
 
-    availableSeatIndices.reverse();
+    if (isTeacherView) { availableSeatIndices.reverse(); }
+
 
     const neededSeats = pairing ? Math.ceil(studentNumbers.length / 2) : studentNumbers.length;
     if (availableSeatIndices.length < neededSeats) {

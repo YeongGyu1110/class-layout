@@ -322,7 +322,6 @@ input:checked+.slider:before {
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.2s ease;
     box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.4);
-    margin-top: auto;
     width: 100%;
     max-width: 300px;
     margin-top: 20px;
@@ -352,8 +351,6 @@ main {
 #blackboard {
     width: 100%;
     max-width: 1000px;
-    margin-top: 40px;
-    margin-bottom: 20px;
     padding: 10px 24px;
     background-color: var(--blackboard-bg);
     color: var(--blackboard-text);
@@ -366,13 +363,40 @@ main {
     transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
 }
 
+main[data-view="teacher"] #blackboard {
+    order: 2;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+main[data-view="teacher"] #seatContainer {
+    order: 1;
+}
+
+main[data-view="student"] #blackboard {
+    order: 1;
+    margin-top: 0px;
+    margin-bottom: 40px;
+}
+main[data-view="student"] #seatContainer {
+    order: 2;
+}
+
+#btnGenerate {
+    order: 3;
+}
+.guide-content {
+    order: 4;
+}
+.license-footer {
+    order: 5;
+}
+
 #seatContainer {
     display: grid;
     gap: 16px;
     width: 100%;
     max-width: 1000px;
     justify-content: center;
-    grid-template-columns: repeat(5, 1fr);
 }
 
 .seat {
@@ -503,7 +527,16 @@ main {
         padding-bottom: 0;
     }
     
-    #blackboard {
+    main[data-view="teacher"] #blackboard {
+        margin-bottom: 80px; 
+    }
+    main[data-view="teacher"] #seatContainer {
+        margin-bottom: 0;
+    }
+    main[data-view="student"] #blackboard {
+        margin-bottom: 40px; 
+    }
+    main[data-view="student"] #seatContainer {
         margin-bottom: 80px; 
     }
 
