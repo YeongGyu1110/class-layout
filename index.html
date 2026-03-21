@@ -17,6 +17,7 @@
     <meta property="og:url" content="https://yeonggyu1110.github.io/class-layout/">
     <meta property="og:site_name" content="Class Layout">
     <link rel="stylesheet" href="style/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="application/ld+json">
         {
         "@context": "https://schema.org",
@@ -46,6 +47,16 @@
             <p>Smart Seating System</p>
         </div>
         <div class="header-controls">
+
+            <button class="btn-icon" onclick="generatePDF()" title="현재 자리표 PDF 다운로드">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </button>
+
             <button class="btn-icon mobile-only" onclick="toggleSettings()" title="설정 열기">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -118,6 +129,14 @@
                     <label for="pairing">짝지어 앉기 (짝꿍)</label>
                     <label class="switch">
                         <input type="checkbox" id="pairing">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <label for="autoDownloadPdf">자동 PDF 다운로드</label>
+                    <label class="switch">
+                        <input type="checkbox" id="autoDownloadPdf">
                         <span class="slider"></span>
                     </label>
                 </div>
