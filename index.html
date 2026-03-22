@@ -17,6 +17,7 @@
     <meta property="og:url" content="https://yeonggyu1110.github.io/class-layout/">
     <meta property="og:site_name" content="Class Layout">
     <link rel="stylesheet" href="style/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="application/ld+json">
         {
         "@context": "https://schema.org",
@@ -46,6 +47,16 @@
             <p>Smart Seating System</p>
         </div>
         <div class="header-controls">
+
+            <button class="btn-icon" onclick="generatePDF()" title="현재 자리표 PDF 다운로드">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            </button>
+
             <button class="btn-icon mobile-only" onclick="toggleSettings()" title="설정 열기">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -105,10 +116,27 @@
 
             <div class="nav-section">
                 <span class="nav-title">Settings</span>
+
+                <div class="toggle-row">
+                    <label for="viewMode">선생님 시점 (칠판 아래)</label>
+                    <label class="switch">
+                        <input type="checkbox" id="viewMode" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
                 <div class="toggle-row">
                     <label for="pairing">짝지어 앉기 (짝꿍)</label>
                     <label class="switch">
                         <input type="checkbox" id="pairing">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <label for="autoDownloadPdf">자동 PDF 다운로드</label>
+                    <label class="switch">
+                        <input type="checkbox" id="autoDownloadPdf">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -120,9 +148,9 @@
             </div>
         </nav>
 
-        <main>
-            <div id="blackboard">Front (칠판)</div>
+        <main data-view="teacher">
             <div id="seatContainer"></div>
+            <div id="blackboard">Front (칠판)</div>
             <button id="btnGenerate" class="btn-primary" onclick="generateSeats()">
                 <span class="btn-text">자리 배치 시작</span>
                 <span class="btn-icon-only">🎲</span>
@@ -137,6 +165,7 @@
                 <h3>주요 기능</h3>
                 <ul>
                     <li><strong>랜덤 배치:</strong> 학생 수와 분단 형태(행/열)만 입력하면 자동으로 자리를 섞어줍니다.</li>
+                    <li><strong>시점 전환:</strong> 스위치를 통해 칠판의 위치를 선생님 기준 또는 학생 기준으로 바로 바꿀 수 있습니다.</li>
                     <li><strong>짝꿍 모드:</strong> 두 명씩 짝을 지어 앉는 형태도 지원합니다.</li>
                     <li><strong>제외 기능:</strong> 전학생이나 결석생 등 특정 번호를 제외하고 배정할 수 있습니다.</li>
                     <li><strong>모바일 지원:</strong> 스마트폰, 태블릿에서도 완벽하게 작동하여 교실 어디서든 사용할 수 있습니다.</li>

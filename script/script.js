@@ -13,7 +13,9 @@ function saveData() {
         rowCount: document.getElementById('rowCount').value,
         colCount: document.getElementById('colCount').value,
         pairing: document.getElementById('pairing').checked,
+        viewMode: document.getElementById('viewMode').checked,
         excludeStudents: document.getElementById('excludeStudents').value,
+        autoDownloadPdf: document.getElementById('autoDownloadPdf').checked,
         manualStatus: manualStatus,
         seatContainerHTML: document.getElementById('seatContainer').innerHTML
     };
@@ -53,9 +55,20 @@ function initializeSeats() {
             seat.classList.add('disabled');
         }
 
-        seat.addEventListener('click', () => toggleSeatStatus(seat, i));
+        seat.addEventListener('click', () => toggleSeatStatus(seat));
         seatContainer.appendChild(seat);
     }
+}
+
+function toggleViewMode(isTeacherView) {
+    document.querySelector('main').setAttribute('data-view', isTeacherView ? 'teacher' : 'student');
+    
+    const seatContainer = document.getElementById('seatContainer');
+    const seats = Array.from(seatContainer.children);
+    
+    seats.reverse();
+    seats.forEach(seat => seatContainer.appendChild(seat));
+    manualStatus.reverse();
 }
 
 window.onload = function () {
@@ -70,6 +83,12 @@ window.onload = function () {
         document.getElementById('rowCount').value = data.rowCount;
         document.getElementById('colCount').value = data.colCount;
         document.getElementById('pairing').checked = data.pairing;
+
+        const isTeacherView = data.viewMode !== undefined ? data.viewMode : true;
+        document.getElementById('viewMode').checked = isTeacherView;
+        document.querySelector('main').setAttribute('data-view', isTeacherView ? 'teacher' : 'student');
+        document.getElementById('autoDownloadPdf').checked = data.autoDownloadPdf || false;
+
         document.getElementById('excludeStudents').value = data.excludeStudents;
         manualStatus = data.manualStatus || [];
 
@@ -82,28 +101,36 @@ window.onload = function () {
 
             const seats = seatContainer.getElementsByClassName('seat');
             for (let i = 0; i < seats.length; i++) {
-                seats[i].addEventListener('click', () => toggleSeatStatus(seats[i], i));
+                const currentSeat = seats[i];
+                currentSeat.addEventListener('click', () => toggleSeatStatus(currentSeat));
             }
         } else {
             initializeSeats();
         }
     } else {
+        document.getElementById('viewMode').checked = true;
+        document.querySelector('main').setAttribute('data-view', 'teacher');
         initializeSeats();
     }
 
-    const inputs = ['studentCount', 'rowCount', 'colCount', 'pairing', 'excludeStudents'];
+    const inputs =['studentCount', 'rowCount', 'colCount', 'pairing', 'excludeStudents', 'viewMode', 'autoDownloadPdf'];
     inputs.forEach(id => {
-        document.getElementById(id).addEventListener('change', () => {
+        document.getElementById(id).addEventListener('change', (e) => {
             if (id === 'rowCount' || id === 'colCount') {
                 manualStatus = [];
                 initializeSeats();
+            }
+            if (id === 'viewMode') {
+                toggleViewMode(e.target.checked);
             }
             saveData();
         });
     });
 }
 
-function toggleSeatStatus(seat, index) {
+function toggleSeatStatus(seat) {
+    const index = Array.from(seat.parentNode.children).indexOf(seat);
+
     if (seat.classList.contains('disabled')) {
         seat.classList.remove('disabled');
         manualStatus[index] = 1;
@@ -173,6 +200,8 @@ async function generateSeats() {
     }
 
     const pairing = document.getElementById('pairing').checked;
+    const isTeacherView = document.getElementById('viewMode').checked;
+
     const excludeVal = document.getElementById('excludeStudents').value;
     const excludeStudents = excludeVal ? excludeVal.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)) : [];
 
@@ -204,6 +233,9 @@ async function generateSeats() {
             availableSeatIndices.push(idx);
         }
     });
+
+    if (isTeacherView) { availableSeatIndices.reverse(); }
+
 
     const neededSeats = pairing ? Math.ceil(studentNumbers.length / 2) : studentNumbers.length;
     if (availableSeatIndices.length < neededSeats) {
@@ -277,6 +309,12 @@ async function generateSeats() {
         }
     }
     saveData();
+
+    if (document.getElementById('autoDownloadPdf').checked) {
+        setTimeout(() => {
+            generatePDF();
+        }, 700);
+    }
 }
 
 function toggleSettings() {
@@ -285,4 +323,111 @@ function toggleSettings() {
 
     nav.classList.toggle('active');
     overlay.classList.toggle('active');
+}
+
+function generatePDF() {
+    const colCount = parseInt(document.getElementById('colCount').value) || 5;
+    const isTeacherView = document.getElementById('viewMode').checked;
+
+    // 1. PDF 컨테이너
+    const element = document.createElement('div');
+    element.style.width = '190mm'; 
+    element.style.backgroundColor = '#ffffff';
+    element.style.color = '#000000';
+    element.style.boxSizing = 'border-box';
+    element.style.fontFamily = 'sans-serif';
+
+    // 타이틀
+    const title = document.createElement('h2');
+    title.textContent = '학급 자리 배치표';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '20px';
+    title.style.fontSize = '24px';
+    element.appendChild(title);
+
+    // 칠판 요소
+    const blackboard = document.createElement('div');
+    blackboard.textContent = '칠판';
+    blackboard.style.width = '100%';
+    blackboard.style.padding = '10px 0';
+    blackboard.style.textAlign = 'center';
+    blackboard.style.border = '1px solid #000';
+    blackboard.style.fontWeight = 'bold';
+    blackboard.style.fontSize = '16px';
+    blackboard.style.boxSizing = 'border-box';
+
+    // 자리표 그리드
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = `repeat(${colCount}, 1fr)`;
+    grid.style.borderTop = '1px solid #000';
+    grid.style.borderLeft = '1px solid #000';
+    grid.style.width = '100%';
+    grid.style.boxSizing = 'border-box';
+
+
+    const seatElements = Array.from(document.getElementById('seatContainer').children);
+
+    seatElements.forEach(uiSeat => {
+        const cell = document.createElement('div');
+        cell.style.borderBottom = '1px solid #000';
+        cell.style.borderRight = '1px solid #000';
+        cell.style.height = '80px';
+        cell.style.display = 'flex';
+        cell.style.flexDirection = 'column';
+        cell.style.boxSizing = 'border-box';
+
+        if (uiSeat.classList.contains('disabled')) {
+            cell.style.justifyContent = 'center';
+            cell.style.alignItems = 'center';
+            cell.innerHTML = '<span style="color: #ccc; font-size: 20px;">✕</span>';
+        } else {
+            const topDiv = document.createElement('div');
+            topDiv.style.height = '30px';
+            topDiv.style.display = 'flex';
+            topDiv.style.justifyContent = 'center';
+            topDiv.style.alignItems = 'center';
+            topDiv.style.fontSize = '16px';
+            topDiv.style.fontWeight = 'bold';
+            
+            topDiv.textContent = uiSeat.textContent.replace(/\s+/g, ' ').trim();
+
+            const bottomDiv = document.createElement('div');
+            bottomDiv.style.flex = '1';
+            // bottomDiv.style.borderTop = '1px solid #eee'; 
+            
+            cell.appendChild(topDiv);
+            cell.appendChild(bottomDiv);
+        }
+        grid.appendChild(cell);
+    });
+
+    if (isTeacherView) {
+        grid.style.marginBottom = '20px';
+        element.appendChild(grid);
+        element.appendChild(blackboard);
+    } else {
+        blackboard.style.marginBottom = '20px';
+        element.appendChild(blackboard);
+        element.appendChild(grid);
+    }
+
+    const opt = {
+        margin: 10,
+        filename: `자리배치표_${new Date().toLocaleDateString().replace(/\. /g, '').replace(/\./g, '')}.pdf`,
+        image: {
+            type: 'jpeg',
+            quality: 1.0
+        },
+        html2canvas: {
+            scale: 2
+        }, 
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+        }
+    };
+
+    html2pdf().set(opt).from(element).save();
 }
