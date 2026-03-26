@@ -17,7 +17,6 @@
     <meta property="og:url" content="https://yeonggyu1110.github.io/class-layout/">
     <meta property="og:site_name" content="Class Layout">
     <link rel="stylesheet" href="style/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="application/ld+json">
         {
         "@context": "https://schema.org",
@@ -48,7 +47,7 @@
         </div>
         <div class="header-controls">
 
-            <button class="btn-icon" onclick="generatePDF()" title="현재 자리표 PDF 다운로드">
+            <button class="btn-icon" onclick="generateHWP()" title="현재 자리표 한글파일 다운로드">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -134,9 +133,9 @@
                 </div>
 
                 <div class="toggle-row">
-                    <label for="autoDownloadPdf">자동 PDF 다운로드</label>
+                    <label for="autoDownloadHwp">자동 다운로드 (한글파일)</label>
                     <label class="switch">
-                        <input type="checkbox" id="autoDownloadPdf">
+                        <input type="checkbox" id="autoDownloadHwp">
                         <span class="slider"></span>
                     </label>
                 </div>
