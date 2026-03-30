@@ -352,7 +352,7 @@ function generateHWP() {
 
             let cellContent = '';
             if (uiSeat && uiSeat.classList.contains('disabled')) {
-                cellContent = '<div style="text-align:center; color:#cccccc; font-size:20px; line-height:80px;">✕</div>';
+                cellContent = '<div style="text-align:center; color:#cccccc; font-size:20px; line-height:120px;">✕</div>';
             } else if (uiSeat) {
                 const seatNum = uiSeat.textContent.replace(/\s+/g, ' ').trim();
                 cellContent = `
@@ -362,7 +362,7 @@ function generateHWP() {
             }
 
             tableRowsHtml += `
-                <td style="width: ${100/colCount}%; border: 1px solid #000000; vertical-align: top; padding: 0;">
+                <td style="width: ${100/colCount}%; height: 120px; border: 1px solid #000000; vertical-align: top; padding: 0;">
                     ${cellContent}
                 </td>
             `;
