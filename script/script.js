@@ -183,10 +183,17 @@ function shuffle(array) {
     return array;
 }
 
-async function generateSeats() {
+function toggleSettings() {
+    const panel = document.getElementById('controlPanel');
+    const overlay = document.getElementById('overlay');
 
-    const nav = document.querySelector('nav');
-    if (nav.classList.contains('active')) {
+    if (panel) panel.classList.toggle('active');
+    if (overlay) overlay.classList.toggle('active');
+}
+
+async function generateSeats() {
+    const panel = document.getElementById('controlPanel');
+    if (panel && panel.classList.contains('active')) {
         toggleSettings();
     }
 
@@ -262,9 +269,9 @@ async function generateSeats() {
                     const idx2 = (i * 2 + 1) % shuffledAnim.length;
 
                     seat.innerHTML = `
-                                <span style="font-size: 1.2rem">${padNumber(shuffledAnim[idx1])}</span>
+                                <span style="font-size: 1.1rem">${padNumber(shuffledAnim[idx1])}</span>
                                 <span style="margin:0 6px; opacity:0.3; font-weight:300;">|</span>
-                                <span style="font-size: 1.2rem">${padNumber(shuffledAnim[idx2])}</span>
+                                <span style="font-size: 1.1rem">${padNumber(shuffledAnim[idx2])}</span>
                             `;
                 } else {
                     seat.textContent = padNumber(shuffledAnim[i % shuffledAnim.length]);
@@ -317,13 +324,6 @@ async function generateSeats() {
     }
 }
 
-function toggleSettings() {
-    const nav = document.querySelector('nav');
-    const overlay = document.getElementById('overlay');
-
-    nav.classList.toggle('active');
-    overlay.classList.toggle('active');
-}
 
 function generateHWP() {
     const colCount = parseInt(document.getElementById('colCount').value) || 5;
