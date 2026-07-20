@@ -1,5 +1,5 @@
 (function () {
-    const savedTheme = localStorage.getItem('classLayoutTheme');
+    const savedTheme = localStorage.getItem('schoolAppsTheme');
     const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const theme = savedTheme ? savedTheme : (systemPrefersDark ? 'dark' : 'light');
     document.body.setAttribute('data-theme', theme);
@@ -28,7 +28,7 @@ function toggleTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
     body.setAttribute('data-theme', newTheme);
-    localStorage.setItem('classLayoutTheme', newTheme);
+    localStorage.setItem('schoolAppsTheme', newTheme);
 }
 
 function initializeSeats() {
