@@ -3,6 +3,7 @@
     const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const theme = savedTheme ? savedTheme : (systemPrefersDark ? 'dark' : 'light');
     document.body.setAttribute('data-theme', theme);
+    updateThemeButtonText(theme);
 })();
 
 let manualStatus = [];
@@ -29,6 +30,14 @@ function toggleTheme() {
 
     body.setAttribute('data-theme', newTheme);
     localStorage.setItem('schoolAppsTheme', newTheme);
+    updateThemeButtonText(newTheme);
+}
+
+function updateThemeButtonText(theme) {
+    const themeText = document.getElementById('theme-text');
+    if (themeText) {
+        themeText.textContent = theme === 'dark' ? '라이트 테마 전환' : '다크 테마 전환';
+    }
 }
 
 function initializeSeats() {
